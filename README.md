@@ -41,6 +41,7 @@ echo $SHELL
 docker --version
 git --version
 gh --version
+docker version
 docker info
 ```
 
@@ -191,10 +192,19 @@ docker --version
 Docker version 29.9.2
 ```
 
-### Docker 실행 테스트
+### Docker 클라이언트 및 서버 정보 확인
 
 ```bash
-docker run hello-world
+docker version
+docker info
+```
+
+Docker 클라이언트와 서버의 버전, 실행 환경 및 시스템 정보를 확인했습니다.
+
+### Hello World 컨테이너 실행
+
+```bash
+docker run --rm hello-world
 ```
 
 실행 결과:
@@ -524,7 +534,7 @@ Git을 이용하여 프로젝트를 관리하고 GitHub 원격 저장소와 연�
 
 ```bash
 git config --global user.name "caterina1974"
-git config --global user.email "본인의 GitHub 이메일"
+git config --global user.email "mjshin99@gmail.com"
 git config --global init.defaultBranch main
 ```
 
@@ -534,7 +544,7 @@ git config --global init.defaultBranch main
 git config --list
 ```
 
-Git 사용자 이름은 `caterina1974`, 기본 브랜치는 `main`으로 설정했습니다.
+Git 사용자 이름은 `caterina1974`, 이메일은 `mjshin99@gmail.com`, 기본 브랜치는 `main`으로 설정했습니다.
 
 ### Git 저장소 초기화
 
@@ -802,7 +812,8 @@ dev-workstation/
     ├── 16-volume-before.png
     ├── 17-volume-after.png
     ├── 18-git-config.png
-    └── 19-vscode-github.png
+    ├── 19-vscode-github.png
+    └── 20-github-repository.png
 ```
 
 ## 16. 실습 스크린샷 및 증빙 자료
@@ -816,7 +827,7 @@ dev-workstation/
 | 02 | 파일 및 디렉터리 관리 | [확인하기](screenshots/02-file-operations.png) |
 | 03 | Linux 파일 권한 설정 | [확인하기](screenshots/03-file-permissions.png) |
 | 04 | 개발 환경 확인 | [확인하기](screenshots/04-development-environment.png) |
-| 05 | Docker 환경 정보 | [확인하기](screenshots/05-docker-info.png) |
+| 05 | Docker 클라이언트 및 서버 정보 | [확인하기](screenshots/05-docker-info.png) |
 | 06 | Hello World 컨테이너 실행 | [확인하기](screenshots/06-hello-world.png) |
 | 07 | Ubuntu 대화형 컨테이너 | [확인하기](screenshots/07-ubuntu-container.png) |
 | 08 | Docker Exec 실습 | [확인하기](screenshots/08-docker-exec.png) |
@@ -830,7 +841,8 @@ dev-workstation/
 | 16 | Volume 데이터 저장 및 컨테이너 삭제 전 | [확인하기](screenshots/16-volume-before.png) |
 | 17 | 새 컨테이너에서 Volume 데이터 확인 | [확인하기](screenshots/17-volume-after.png) |
 | 18 | Git 설정 | [확인하기](screenshots/18-git-config.png) |
-| 19 | VS Code 및 GitHub 화면 | [확인하기](screenshots/19-vscode-github.png) |
+| 19 | VS Code 및 GitHub 연동 | [확인하기](screenshots/19-vscode-github.png) |
+| 20 | GitHub 저장소 페이지 | [확인하기](screenshots/20-github-repository.png) |
 
 ---
 
