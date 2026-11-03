@@ -4,23 +4,21 @@
 
 이 프로젝트는 Windows 환경에서 WSL 2, Ubuntu, Docker Desktop, Git, GitHub 및 Visual Studio Code를 활용하여 개발 워크스테이션을 구축하고 설정하는 과정을 기록한 프로젝트입니다.
 
-프로젝트의 주요 목표는 다음과 같습니다.
+주요 실습 내용은 다음과 같습니다.
 
-- Linux 명령줄 환경과 기본 파일 관리 명령어 익히기
-- Linux 파일 및 디렉터리 권한 설정하기
-- Docker 설치 및 컨테이너 관리 실습하기
-- Dockerfile을 사용하여 사용자 정의 이미지 만들기
-- 포트 매핑을 통해 웹 서버 실행하기
-- Bind Mount를 이용하여 호스트 파일과 컨테이너 연결하기
-- Docker Volume을 이용한 데이터 영속성 확인하기
-- Git 설정 및 GitHub 저장소 연동하기
-- Visual Studio Code에서 프로젝트 작업하기
+- Linux 기본 명령어를 이용한 파일 및 디렉터리 관리
+- Linux 파일 및 디렉터리 권한 설정
+- Docker 이미지 및 컨테이너 생성과 관리
+- Dockerfile을 이용한 사용자 정의 이미지 빌드
+- NGINX 웹 서버 실행 및 포트 매핑
+- Bind Mount를 이용한 호스트와 컨테이너 간 파일 공유
+- Docker Volume을 이용한 데이터 영속성 확인
+- Git 설정 및 GitHub 원격 저장소 연동
+- Visual Studio Code를 이용한 프로젝트 관리
 
 **GitHub 저장소:** [caterina1974/dev-workstation](https://github.com/caterina1974/dev-workstation)
 
 ## 2. 개발 환경
-
-프로젝트 구축에 사용한 개발 환경은 다음과 같습니다.
 
 | 구성 요소 | 버전 및 설정 |
 |---|---|
@@ -29,9 +27,9 @@
 | Linux 배포판 | Ubuntu 24.04.5 LTS |
 | 셸 | Bash |
 | Docker CLI | 29.9.2 |
-| Docker Desktop | WSL 2 연동 환경 |
 | Git | 2.43.0 |
 | GitHub CLI | 2.103.3 |
+| 아키텍처 | AMD64 |
 
 ### 개발 환경 확인
 
@@ -46,7 +44,7 @@ gh --version
 docker info
 ```
 
-Docker Desktop의 WSL Integration을 활성화하여 Ubuntu 환경에서 Docker 명령어를 사용할 수 있도록 설정했습니다.
+Docker Desktop의 WSL Integration을 활성화하여 Ubuntu 환경에서 Docker를 사용할 수 있도록 설정했습니다.
 
 ## 3. Linux 기본 명령어 실습
 
@@ -59,8 +57,6 @@ pwd
 ls
 ls -la
 ```
-
-각 명령어의 기능은 다음과 같습니다.
 
 - `pwd`: 현재 작업 디렉터리의 경로를 확인합니다.
 - `ls`: 현재 디렉터리의 파일과 폴더 목록을 표시합니다.
@@ -105,13 +101,11 @@ ls -la archive
 
 ```bash
 pwd
-
 cat notes.txt
-
 cat ~/dev-workstation/cli-practice/notes.txt
 ```
 
-파일의 상대 경로와 절대 경로를 사용하여 내용을 확인했습니다.
+상대 경로와 절대 경로를 사용하여 파일의 내용을 확인했습니다.
 
 ## 4. Linux 파일 및 디렉터리 권한 설정
 
@@ -164,7 +158,7 @@ drwxr-xr-x permission-dir
 
 ### Linux 권한의 의미
 
-Linux의 파일 및 디렉터리 권한은 사용자 소유자, 그룹, 기타 사용자 세 가지 범주로 구분됩니다.
+Linux의 파일 및 디렉터리 권한은 소유자(Owner), 그룹(Group), 기타 사용자(Others) 세 가지 범주로 구분됩니다.
 
 | 권한 | 의미 | 숫자 |
 |---|---|---:|
@@ -197,15 +191,7 @@ docker --version
 Docker version 29.9.2
 ```
 
-### Docker 실행 환경 확인
-
-```bash
-docker info
-```
-
-Docker의 클라이언트 정보와 서버 연결 상태를 확인하는 데 사용했습니다.
-
-### Hello World 컨테이너 실행
+### Docker 실행 테스트
 
 ```bash
 docker run hello-world
@@ -286,7 +272,7 @@ docker ps -a --filter name=mission-ubuntu-background
 
 컨테이너를 중지한 뒤에도 컨테이너 자체는 삭제되지 않고 종료 상태로 남아 있는 것을 확인했습니다.
 
-### 주요 Docker 명령어 비교
+### 주요 Docker 명령어
 
 | 명령어 | 기능 |
 |---|---|
@@ -335,10 +321,10 @@ COPY site/ /usr/share/nginx/html/
 EXPOSE 80
 ```
 
-### Dockerfile 주요 명령어 설명
+### Dockerfile 주요 명령어
 
 - `FROM nginx:alpine`: 경량 NGINX Alpine 이미지를 기반 이미지로 사용합니다.
-- `LABEL`: 이미지에 제목 등의 메타데이터를 추가합니다.
+- `LABEL`: 이미지에 메타데이터를 추가합니다.
 - `ENV`: 컨테이너에서 사용할 환경 변수를 설정합니다.
 - `COPY`: 호스트의 `site/` 디렉터리 내용을 컨테이너의 웹 서버 디렉터리에 복사합니다.
 - `EXPOSE 80`: 컨테이너가 사용하는 웹 서버 포트를 명시합니다.
@@ -385,7 +371,7 @@ NGINX 로그에서 웹 페이지 요청이 HTTP 상태 코드 `200`으로 정상
 
 ## 9. Docker 이미지 및 컨테이너 모니터링
 
-Docker에서 제공하는 여러 명령어를 사용하여 이미지와 컨테이너 상태를 확인했습니다.
+Docker에서 제공하는 명령어를 사용하여 이미지와 컨테이너 상태를 확인했습니다.
 
 ```bash
 docker images
@@ -427,7 +413,7 @@ docker run -d \
   nginx:alpine
 ```
 
-### Bind Mount 설정 설명
+### Bind Mount 설정
 
 | 항목 | 경로 |
 |---|---|
@@ -460,9 +446,9 @@ EOF
 
 호스트의 HTML 파일을 수정했습니다.
 
-Bind Mount를 통해 호스트 디렉터리가 컨테이너에 연결되어 있으므로 Docker 이미지를 다시 빌드하지 않아도 수정된 파일을 컨테이너의 웹 서버 디렉터리에서 사용할 수 있습니다.
+Bind Mount를 통해 호스트 디렉터리가 컨테이너에 연결되어 있으므로 Docker 이미지를 다시 빌드하지 않아도 수정된 파일을 웹 서버에서 확인할 수 있습니다.
 
-웹 서버에 연결할 때 사용하는 주소는 다음과 같습니다.
+웹 브라우저 접속 주소:
 
 **http://localhost:8081**
 
@@ -538,11 +524,9 @@ Git을 이용하여 프로젝트를 관리하고 GitHub 원격 저장소와 연�
 
 ```bash
 git config --global user.name "caterina1974"
-git config --global user.email "YOUR_EMAIL"
+git config --global user.email "본인의 GitHub 이메일"
 git config --global init.defaultBranch main
 ```
-
-`YOUR_EMAIL`에는 본인의 GitHub 커밋에 사용할 이메일 주소를 입력합니다.
 
 설정 확인:
 
@@ -550,7 +534,7 @@ git config --global init.defaultBranch main
 git config --list
 ```
 
-실제 설정에서 사용자 이름은 `caterina1974`, 기본 브랜치는 `main`으로 확인되었습니다.
+Git 사용자 이름은 `caterina1974`, 기본 브랜치는 `main`으로 설정했습니다.
 
 ### Git 저장소 초기화
 
@@ -589,30 +573,15 @@ GitHub는 HTTPS 방식의 Git 작업에서 일반 계정 비밀번호 인증을 
 
 ```bash
 gh auth login
-```
-
-인증 과정에서 다음 항목을 선택했습니다.
-
-- GitHub.com
-- Login with a web browser
-- HTTPS
-- Authenticate Git with your GitHub credentials: Yes
-
-인증 상태 확인:
-
-```bash
 gh auth status
-```
-
-Git에 GitHub CLI 인증 정보를 연결했습니다.
-
-```bash
 gh auth setup-git
 ```
 
+인증 과정에서 GitHub.com, HTTPS 및 브라우저 인증 방식을 선택했습니다.
+
 ### GitHub에 프로젝트 업로드
 
-최초 Push 과정에서 원격 저장소에 로컬 저장소에 없는 커밋이 존재하여 Push가 거부되었습니다.
+최초 Push 과정에서 원격 저장소에 로컬 저장소에는 없는 커밋이 존재하여 Push가 거부되었습니다.
 
 이를 해결하기 위해 원격 저장소의 변경사항을 가져와 기존 로컬 이력과 병합했습니다.
 
@@ -640,6 +609,8 @@ code .
 ```
 
 이를 통해 `dev-workstation` 프로젝트 폴더를 Visual Studio Code에서 열었습니다.
+
+VS Code 및 GitHub 관련 화면도 스크린샷으로 기록했습니다.
 
 ## 14. 문제 해결 과정 (Troubleshooting)
 
@@ -783,8 +754,6 @@ Windows PowerShell과 Ubuntu WSL은 서로 다른 명령줄 환경이므로 Linu
 
 Linux 명령어는 Ubuntu 터미널에서 실행하고, WSL 배포판 관리 명령어는 Windows PowerShell에서 실행하도록 구분했습니다.
 
-예를 들어 다음과 같이 사용했습니다.
-
 Ubuntu 터미널:
 
 ```bash
@@ -803,8 +772,6 @@ wsl -d Ubuntu-24.04
 ```
 
 ## 15. 프로젝트 디렉터리 구조
-
-현재 프로젝트의 주요 디렉터리 및 파일 구조는 다음과 같습니다.
 
 ```text
 dev-workstation/
@@ -834,12 +801,13 @@ dev-workstation/
     ├── 15-bind-mount-after.png
     ├── 16-volume-before.png
     ├── 17-volume-after.png
-    └── 18-git-config.png
+    ├── 18-git-config.png
+    └── 19-vscode-github.png
 ```
 
 ## 16. 실습 스크린샷 및 증빙 자료
 
-다음 스크린샷은 각 단계의 설정 및 실행 결과를 기록한 자료입니다.
+각 단계의 설정 및 실행 결과를 다음 스크린샷으로 기록했습니다.
 
 | 번호 | 내용 | 스크린샷 |
 |---|---|---|
@@ -862,12 +830,13 @@ dev-workstation/
 | 16 | Volume 데이터 저장 및 컨테이너 삭제 전 | [확인하기](screenshots/16-volume-before.png) |
 | 17 | 새 컨테이너에서 Volume 데이터 확인 | [확인하기](screenshots/17-volume-after.png) |
 | 18 | Git 설정 | [확인하기](screenshots/18-git-config.png) |
+| 19 | VS Code 및 GitHub 화면 | [확인하기](screenshots/19-vscode-github.png) |
 
 ---
 
 ## 결론
 
-이번 프로젝트를 통해 Windows와 WSL 2 기반의 Ubuntu 개발 환경을 구축하고, Linux 기본 명령어 및 파일 권한 설정부터 Docker 컨테이너 관리와 사용자 정의 이미지 생성까지 다양한 개발 환경 구성 작업을 실습했습니다.
+이번 프로젝트를 통해 Windows와 WSL 2 기반의 Ubuntu 개발 환경을 구축하고, Linux 기본 명령어와 파일 권한 설정부터 Docker 컨테이너 관리 및 사용자 정의 이미지 생성까지 다양한 개발 환경 구성 작업을 실습했습니다.
 
 또한 NGINX 웹 서버를 실행하고 포트 매핑, Bind Mount, Docker Volume을 활용하여 웹 서비스 실행과 데이터 영속성을 확인했습니다.
 
