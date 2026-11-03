@@ -15,6 +15,7 @@
 - Docker Volume을 이용한 데이터 영속성 확인
 - Git 설정 및 GitHub 원격 저장소 연동
 - Visual Studio Code를 이용한 프로젝트 관리
+- 개발 환경 구축 과정에서 발생한 오류와 해결 방법 기록
 
 **GitHub 저장소:** [caterina1974/dev-workstation](https://github.com/caterina1974/dev-workstation)
 
@@ -27,6 +28,7 @@
 | Linux 배포판 | Ubuntu 24.04.5 LTS |
 | 셸 | Bash |
 | Docker CLI | 29.9.2 |
+| Docker Desktop | 4.97.0 |
 | Git | 2.43.0 |
 | GitHub CLI | 2.103.3 |
 | 아키텍처 | AMD64 |
@@ -192,14 +194,16 @@ docker --version
 Docker version 29.9.2
 ```
 
-### Docker 클라이언트 및 서버 정보 확인
+### Docker 실행 환경 확인
 
 ```bash
 docker version
 docker info
 ```
 
-Docker 클라이언트와 서버의 버전, 실행 환경 및 시스템 정보를 확인했습니다.
+Docker 클라이언트 및 서버 정보를 확인하기 위해 위 명령어를 사용했습니다.
+
+초기 확인 과정에서 Docker Socket 접근 권한 오류가 발생했지만, 이후 사용자 그룹 권한을 적용하고 WSL 세션을 재시작하여 문제를 해결했습니다.
 
 ### Hello World 컨테이너 실행
 
@@ -827,7 +831,7 @@ dev-workstation/
 | 02 | 파일 및 디렉터리 관리 | [확인하기](screenshots/02-file-operations.png) |
 | 03 | Linux 파일 권한 설정 | [확인하기](screenshots/03-file-permissions.png) |
 | 04 | 개발 환경 확인 | [확인하기](screenshots/04-development-environment.png) |
-| 05 | Docker 클라이언트 및 서버 정보 | [확인하기](screenshots/05-docker-info.png) |
+| 05 | Docker 환경 정보 | [확인하기](screenshots/05-docker-info.png) |
 | 06 | Hello World 컨테이너 실행 | [확인하기](screenshots/06-hello-world.png) |
 | 07 | Ubuntu 대화형 컨테이너 | [확인하기](screenshots/07-ubuntu-container.png) |
 | 08 | Docker Exec 실습 | [확인하기](screenshots/08-docker-exec.png) |
@@ -843,6 +847,10 @@ dev-workstation/
 | 18 | Git 설정 | [확인하기](screenshots/18-git-config.png) |
 | 19 | VS Code 및 GitHub 연동 | [확인하기](screenshots/19-vscode-github.png) |
 | 20 | GitHub 저장소 페이지 | [확인하기](screenshots/20-github-repository.png) |
+
+### GitHub 저장소 화면
+
+![GitHub 저장소 페이지](screenshots/20-github-repository.png)
 
 ---
 
