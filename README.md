@@ -19,6 +19,8 @@
 
 **GitHub 저장소:** [caterina1974/dev-workstation](https://github.com/caterina1974/dev-workstation)
 
+> 최신 증빙 업데이트: 2026-11-05 Docker 서버 연결 및 컨테이너·이미지 목록의 실제 터미널 캡처를 `screenshots/21`~`screenshots/25`에 추가했습니다.
+
 ## 2. 개발 환경
 
 | 구성 요소 | 버전 및 설정 |
@@ -259,6 +261,16 @@ docker info | sed -n '1,35p'
 
 위 명령의 실제 출력은 Docker Desktop 버전과 실행 환경에 따라 달라질 수 있으므로, 제출 시 본인 컴퓨터에서 실행한 결과를 붙여 넣습니다.
 
+### 2026-11-05 실제 Docker 서버 연결 확인
+
+2026년 11월 5일 Ubuntu(WSL 2) 터미널에서 `docker info`를 실행한 화면을 캡처했습니다. 화면에는 Docker Client 버전 `29.9.2`, Docker Desktop 관련 명령 플러그인 버전 `4.97.0`, Server의 컨테이너 수 `8`, 실행 중 컨테이너 수 `0`이 표시됩니다. Server 항목까지 출력된 것을 통해 해당 시점에 Docker 클라이언트가 Docker 서버에 연결된 사실을 확인했습니다.
+
+![2026-11-05 docker info 실제 실행 화면](screenshots/21-docker-info-20261105.png)
+
+> 이 캡처는 실행 당시의 상태 기록입니다. 컨테이너 실행 상태는 이후 변경될 수 있으므로 현재 상태를 확인할 때는 `docker info`와 `docker ps`를 다시 실행합니다.
+
+초기에는 WSL 배포판에서 `docker` 명령을 찾지 못하는 오류가 있었으나, Docker Desktop의 WSL Integration에서 Ubuntu 연동을 활성화한 뒤 Ubuntu 터미널을 다시 열어 재확인했습니다. 이후 캡처에서 `docker info`의 Server 정보가 출력되어 연동이 정상화된 것을 확인했습니다.
+
 초기 확인 과정에서 Docker Socket 접근 권한 오류가 발생했지만, 이후 사용자 그룹 권한을 적용하고 WSL 세션을 재시작하여 문제를 해결했습니다.
 
 ### Hello World 컨테이너 실행
@@ -387,14 +399,53 @@ docker run -d --name mission-web-example -p 8082:80 mission-web:1.0
 docker ps -a
 ```
 
-### 컨테이너 및 이미지 목록의 실제 출력 확인
+### 2026-11-05 컨테이너 및 이미지 목록 실제 확인 결과
+
+다음 네 가지 명령을 Ubuntu 터미널에서 실행하고 화면을 캡처했습니다.
 
 ```bash
+docker info
+docker ps
 docker ps -a
 docker images
 ```
 
-위 두 명령의 결과에는 실행·종료된 컨테이너와 로컬 이미지가 표시됩니다. 실제 제출 시에는 본인 환경에서 실행한 출력 일부를 README 본문에 추가합니다.
+**실제 확인 결과**
+
+| 명령어 | 2026-11-05 화면에서 확인한 결과 |
+|---|---|
+| `docker info` | Server 정보 출력, 전체 컨테이너 8개, 실행 중 0개 |
+| `docker ps` | 실행 중인 컨테이너 행이 없는 빈 목록 |
+| `docker ps -a` | 컨테이너 8개가 표시되며 모두 `Exited` 상태 |
+| `docker images` | 로컬 이미지 7개 표시 |
+
+`docker ps` 결과가 비어 있는 것은 명령 오류가 아니라 실행 중인 컨테이너가 없다는 뜻입니다. `docker ps -a`에는 종료된 컨테이너도 포함되므로 8개 항목이 표시됩니다.
+
+전체 컨테이너 목록 화면:
+
+![docker ps 및 docker ps -a 실제 실행 화면](screenshots/22-docker-containers-20261105.png)
+
+전체 이미지 목록 화면:
+
+![docker images 실제 실행 화면](screenshots/23-docker-images-20261105.png)
+
+같은 실행 시점의 컨테이너와 이미지 목록을 함께 담은 화면도 보관했습니다.
+
+![컨테이너 및 이미지 목록 통합 화면](screenshots/24-docker-inventory-overview-20261105.png)
+
+**확인된 로컬 이미지 7개**
+
+| 이미지 | 화면에 표시된 이미지 ID |
+|---|---|
+| `hello-world:latest` | `c567b231f656` |
+| `my-first-web:latest` | `5be6587185b0` |
+| `my-ubuntu-app:latest` | `b4bbcd9a7719` |
+| `my-web-app:latest` | `a55d7e5a80e2` |
+| `nginx:alpine` | `785835ea65db` |
+| `test:latest` | `b9c9503feacf` |
+| `ubuntu:latest` | `6a06111c3b0a` |
+
+**공용 컴퓨터 사용에 관한 주의:** 화면에 나타난 컨테이너와 이미지는 기존 환경에 있던 항목일 수 있습니다. 이 목록을 모두 본인이 생성한 실습 결과라고 단정하지 않습니다. 이번 확인에서는 조회 명령만 실행했으며 기존 컨테이너·이미지·Volume을 삭제하거나 변경하지 않았습니다.
 
 ## 7. Dockerfile을 이용한 사용자 정의 이미지 생성
 
@@ -493,6 +544,16 @@ Docker의 기본 Bridge 네트워크를 사용하는 컨테이너는 별도의 �
 | 호스트 포트 | 8080 |
 | 컨테이너 포트 | 80 |
 
+2026-11-05에 확인한 기존 컨테이너 메타정보에는 다음 포트 게시 설정도 표시되어 있었습니다. 다만 해당 컨테이너들은 모두 `Exited` 상태였으므로 아래 값은 **과거 컨테이너 설정 정보**이며, 현재 웹 서비스가 실행 중이거나 해당 포트로 접속 가능하다는 증거는 아닙니다.
+
+| 기존 컨테이너 이름 | 화면에 표시된 포트 설정 | 캡처 당시 상태 |
+|---|---|---|
+| `my-web-check` | `8082:80` | Exited |
+| `my-web` | `8080:8000` | Exited |
+| `my-bind-web` | `8081:80` | Exited |
+
+실제 포트 매핑 동작을 증명하려면 본인 실습용 컨테이너를 실행한 뒤 `docker ps`의 PORTS 열과 `curl -I http://localhost:<호스트포트>` 결과 또는 브라우저 화면을 별도로 추가해야 합니다.
+
 웹 브라우저의 주소창에 다음 주소를 입력하여 접속했습니다.
 
 **http://localhost:8080**
@@ -558,7 +619,7 @@ docker stats --no-stream mission-web
 - `docker logs`: 특정 컨테이너의 로그 확인
 - `docker stats --no-stream`: 컨테이너의 CPU, 메모리 및 기타 사용량 확인
 
-이를 통해 NGINX 웹 서버의 실행 상태와 리소스 사용량을 확인했습니다.
+기본 명령의 의미는 위와 같습니다. 다만 2026-11-05 캡처에서는 `docker ps`에 실행 중인 컨테이너가 표시되지 않았고, `docker ps -a`에서 8개 컨테이너가 모두 종료 상태였습니다. 따라서 이 날짜의 상태 기록만으로 특정 NGINX 웹 서버가 실행 중이라고 표현하지 않습니다. `docker logs`와 `docker stats`는 해당 이름의 컨테이너가 실제로 존재하고 상태가 적절할 때 개별적으로 확인합니다.
 
 ## 10. Docker Bind Mount 실습
 
@@ -762,19 +823,22 @@ Git을 이용하여 프로젝트를 관리하고 GitHub 원격 저장소와 연�
 
 ### Git 사용자 정보 설정
 
+공용 컴퓨터에서는 다른 프로젝트의 전역 Git 설정을 변경하지 않도록, 프로젝트 폴더 안에서 저장소 단위(local) 설정을 사용하는 것을 권장합니다. 아래 명령은 `~/dev-workstation` 저장소 안에서 실행합니다.
+
 ```bash
-git config --global user.name "caterina1974"
-git config --global user.email "YOUR_GITHUB_EMAIL_OR_NOREPLY_EMAIL"
-git config --global init.defaultBranch main
+git config --local user.name "caterina1974"
+# 아래 예시 주소를 본인의 GitHub 이메일 또는 GitHub noreply 주소로 바꿔 실행
+git config --local user.email "your-email@example.com"
+git config --local init.defaultBranch main
 ```
 
 설정 확인:
 
 ```bash
-git config --list
+git config --local --list
 ```
 
-Git 사용자 이름과 이메일은 본인의 GitHub 계정 설정에 맞게 지정하고, 기본 브랜치는 `main`으로 설정합니다. 공개 저장소에 개인 이메일을 노출하고 싶지 않다면 GitHub에서 제공하는 noreply 이메일 주소를 사용할 수 있습니다. 위 예시의 이메일 값은 실제 사용하는 주소로 바꿔 실행합니다.
+`--local` 설정은 현재 저장소의 `.git/config`에만 적용되므로 공용 계정의 다른 저장소 설정을 변경하지 않습니다. 이메일 주소는 실제 본인 계정에서 확인한 값으로 바꾸고, 공개 저장소에 개인 이메일을 노출하고 싶지 않다면 GitHub noreply 주소를 사용할 수 있습니다.
 
 ### Git 저장소 초기화
 
@@ -1153,7 +1217,12 @@ dev-workstation/
     ├── 17-volume-after.png
     ├── 18-git-config.png
     ├── 19-vscode-github.png
-    └── 20-github-repository.png
+    ├── 20-github-repository.png
+    ├── 21-docker-info-20261105.png
+    ├── 22-docker-containers-20261105.png
+    ├── 23-docker-images-20261105.png
+    ├── 24-docker-inventory-overview-20261105.png
+    └── 25-docker-images-alt-20261105.png
 ```
 
 ### 디렉터리 및 파일별 역할
@@ -1244,10 +1313,33 @@ git ls-remote origin refs/heads/main
 | 18 | Git 설정 | [확인하기](screenshots/18-git-config.png) |
 | 19 | VS Code 및 GitHub 연동 | [확인하기](screenshots/19-vscode-github.png) |
 | 20 | GitHub 저장소 페이지 | [확인하기](screenshots/20-github-repository.png) |
+| 21 | 2026-11-05 Docker 서버 정보 (`docker info`) | [확인하기](screenshots/21-docker-info-20261105.png) |
+| 22 | 2026-11-05 실행/종료 컨테이너 목록 (`docker ps`, `docker ps -a`) | [확인하기](screenshots/22-docker-containers-20261105.png) |
+| 23 | 2026-11-05 Docker 이미지 목록 (`docker images`) | [확인하기](screenshots/23-docker-images-20261105.png) |
+| 24 | 2026-11-05 컨테이너·이미지 통합 화면 | [확인하기](screenshots/24-docker-inventory-overview-20261105.png) |
+| 25 | 2026-11-05 Docker 이미지 목록 추가 캡처 | [확인하기](screenshots/25-docker-images-alt-20261105.png) |
+
+### 2026-11-05 Docker 증빙 화면
+
+![Docker 서버 상태](screenshots/21-docker-info-20261105.png)
+
+![컨테이너 목록](screenshots/22-docker-containers-20261105.png)
+
+![이미지 목록](screenshots/23-docker-images-20261105.png)
 
 ### GitHub 저장소 화면
 
 ![GitHub 저장소 페이지](screenshots/20-github-repository.png)
+
+### 이번 스크린샷으로 확인된 범위와 추가 증빙이 필요한 범위
+
+이번에 받은 화면은 Docker 서버 연결과 로컬 컨테이너·이미지 목록을 확인하는 증빙입니다. 다음 내용은 구분해서 기록합니다.
+
+- 확인됨: Docker 서버 정보 출력, `docker ps`의 빈 실행 목록, `docker ps -a`의 종료 컨테이너 8개, `docker images`의 이미지 7개
+- 일부 정보만 확인됨: 종료된 컨테이너의 포트 게시 설정 메타정보. 실제 서비스 접근이나 현재 포트 리스닝 상태까지 증명하지는 않음
+- 이 스크린샷만으로는 확인되지 않음: 새 컨테이너 생성·실행 및 내부 접속, Dockerfile 재빌드, 웹 페이지 HTTP 200 응답, Volume 백업 파일 생성과 복구 성공
+
+따라서 컨테이너 생명주기, Dockerfile 빌드, 웹 서버 접속, Volume 백업·복구를 평가 증빙으로 제출하려면 각 명령을 본인 실습용 리소스에 대해 다시 실행하고, 그 실제 출력과 화면을 별도로 추가해야 합니다. 기존 공용 컴퓨터의 컨테이너·이미지·Volume은 소유 여부가 확인되지 않았으므로 삭제하거나 덮어쓰지 않습니다.
 
 ---
 
@@ -1259,7 +1351,7 @@ git ls-remote origin refs/heads/main
 
 마지막으로 Git과 GitHub CLI를 이용하여 프로젝트를 버전 관리하고 원격 저장소에 업로드하는 과정을 완료했습니다.
 
-이번 실습에서는 Docker 이미지와 컨테이너의 차이, 컨테이너 네트워크 격리와 포트 게시, Bind Mount 경로 선택, Docker Volume 백업 및 복구, 포트 충돌 진단 방법도 정리했습니다. 문서의 실행 결과와 로그는 실제 Windows·WSL 2·Docker Desktop 환경에서 확인한 내용을 기준으로 유지합니다.
+이번 실습에서는 Docker 이미지와 컨테이너의 차이, 컨테이너 네트워크 격리와 포트 게시, Bind Mount 경로 선택, Docker Volume 백업 및 복구, 포트 충돌 진단 방법도 정리했습니다. 2026년 11월 5일에는 Docker 서버 연결과 컨테이너·이미지 목록의 실제 화면을 추가로 기록했습니다. 각 실행 결과는 캡처 시점의 상태와 이전 실습 기록을 구분하여 유지합니다.
 
 **최종 GitHub 저장소:**
 
