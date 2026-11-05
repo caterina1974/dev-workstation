@@ -49,6 +49,22 @@ docker info
 
 Docker Desktop의 WSL Integration을 활성화하여 Ubuntu 환경에서 Docker를 사용할 수 있도록 설정했습니다.
 
+### Docker 데몬 및 서버 상태 확인
+
+`docker --version`은 Docker CLI 버전을 확인하고, `docker version` 및 `docker info`는 클라이언트와 서버(데몬)의 연결 및 정보를 확인합니다. 다음 명령어로 서버 정보를 핵심 항목 위주로 확인할 수 있습니다.
+
+```bash
+docker version
+docker info | sed -n '1,35p'
+
+docker info --format 'Server Version: {{.ServerVersion}}'
+docker info --format 'Operating System: {{.OperatingSystem}}'
+docker info --format 'Architecture: {{.Architecture}}'
+docker info --format 'CPUs: {{.NCPU}}'
+```
+
+Docker Desktop이 실행 중이고 WSL Integration이 정상적으로 연결되어 있다면 서버 버전과 운영체제 정보가 출력됩니다. 실제 평가 증빙에는 본인 환경에서 실행한 출력 결과를 함께 기록합니다.
+
 ## 3. Linux 기본 명령어 실습
 
 Ubuntu 터미널에서 기본적인 디렉터리 이동과 파일 관리 명령어를 실습했습니다.
@@ -100,6 +116,19 @@ ls -la archive
 
 위 명령어를 통해 파일 복사, 이동, 이름 변경 및 삭제 작업을 수행했습니다.
 
+명령 실행 결과를 본문에 기록할 때는 다음 명령어로 파일 상태를 다시 확인합니다.
+
+```bash
+printf '\n[notes.txt 내용]\n'
+cat notes.txt
+printf '\n[archive 디렉터리]\n'
+ls -la archive
+printf '\n[현재 디렉터리의 파일]\n'
+ls -la
+```
+
+`archive/` 안의 `final.txt`를 삭제한 이후에는 해당 파일이 목록에 남아 있지 않은지 확인합니다. 제출할 때는 위 명령어의 실제 출력 결과를 복사하여 이 절의 실행 결과로 추가합니다.
+
 ### 파일 내용 확인
 
 ```bash
@@ -140,6 +169,14 @@ ls -ld permission-dir
 drwx------ permission-dir
 ```
 
+소유자와 그룹 정보를 포함한 상세 권한은 다음 명령어로 확인합니다.
+
+```bash
+id
+stat -c 'Before: owner=%U group=%G mode=%a file=%n' permission-file.txt
+stat -c 'Before: owner=%U group=%G mode=%a file=%n' permission-dir
+```
+
 ### 권한 변경
 
 ```bash
@@ -159,6 +196,15 @@ ls -ld permission-dir
 drwxr-xr-x permission-dir
 ```
 
+권한 변경 후 소유자, 그룹, 권한을 다시 확인합니다.
+
+```bash
+stat -c 'After: owner=%U group=%G mode=%a file=%n' permission-file.txt
+stat -c 'After: owner=%U group=%G mode=%a file=%n' permission-dir
+```
+
+`chmod`는 접근 권한만 변경하며 파일의 소유자와 그룹은 변경하지 않습니다. 소유자 또는 그룹 변경이 필요한 경우에만 `chown`을 사용합니다. 실제 제출 자료에는 `id`와 `stat`의 실행 결과를 함께 첨부하여 권한 변경 전후를 비교합니다.
+
 ### Linux 권한의 의미
 
 Linux의 파일 및 디렉터리 권한은 소유자(Owner), 그룹(Group), 기타 사용자(Others) 세 가지 범주로 구분됩니다.
@@ -169,14 +215,16 @@ Linux의 파일 및 디렉터리 권한은 소유자(Owner), 그룹(Group), 기�
 | Write (w) | 파일 수정 또는 디렉터리 내 항목 변경 | 2 |
 | Execute (x) | 파일 실행 또는 디렉터리 접근 | 1 |
 
-주요 권한 설정의 의미는 다음과 같습니다.
+주요 권한 설정의 의미와 실습에서 해당 권한을 선택한 이유는 다음과 같습니다.
 
-| 권한 | 설명 |
-|---|---|
-| `600` | 소유자만 읽기 및 쓰기 가능 |
-| `700` | 소유자만 읽기, 쓰기 및 실행 가능 |
-| `644` | 소유자는 읽기 및 쓰기 가능, 나머지는 읽기 가능 |
-| `755` | 소유자는 모든 권한을 가지며, 나머지는 읽기 및 실행 가능 |
+| 권한 | 설명 | 사용 이유 |
+|---|---|---|
+| `600` | 소유자만 읽기 및 쓰기 가능 | 개인 파일처럼 다른 사용자의 열람을 제한해야 하는 파일에 적합 |
+| `700` | 소유자만 읽기, 쓰기 및 실행 가능 | 소유자 외 사용자의 디렉터리 접근을 제한할 때 적합 |
+| `644` | 소유자는 읽기 및 쓰기 가능, 나머지는 읽기 가능 | 일반 문서나 공개적으로 읽혀야 하는 파일에 적합 |
+| `755` | 소유자는 모든 권한을 가지며, 나머지는 읽기 및 실행 가능 | 다른 사용자도 디렉터리를 탐색하거나 공개 파일을 읽어야 할 때 적합 |
+
+권한은 필요한 최소 범위로 부여하는 것이 원칙입니다. 특별한 이유가 없다면 모든 사용자에게 읽기·쓰기·실행을 허용하는 `777`은 사용하지 않습니다. 디렉터리의 실행 권한(`x`)은 디렉터리 내부를 탐색하고 접근할 수 있는 권한을 의미합니다.
 
 ## 5. Docker 설치 및 작동 확인
 
@@ -203,6 +251,14 @@ docker info
 
 Docker 클라이언트 및 서버 정보를 확인하기 위해 위 명령어를 사용했습니다.
 
+서버 정보 중 실제로 확인한 항목을 간단히 기록하려면 다음 명령어를 사용할 수 있습니다.
+
+```bash
+docker info | sed -n '1,35p'
+```
+
+위 명령의 실제 출력은 Docker Desktop 버전과 실행 환경에 따라 달라질 수 있으므로, 제출 시 본인 컴퓨터에서 실행한 결과를 붙여 넣습니다.
+
 초기 확인 과정에서 Docker Socket 접근 권한 오류가 발생했지만, 이후 사용자 그룹 권한을 적용하고 WSL 세션을 재시작하여 문제를 해결했습니다.
 
 ### Hello World 컨테이너 실행
@@ -220,6 +276,15 @@ This message shows that your installation appears to be working correctly.
 ```
 
 `hello-world` 이미지가 정상적으로 다운로드되고 컨테이너가 실행되는 것을 확인했습니다.
+
+평가 증빙을 위해 실행 로그 전체를 파일로 저장하고 확인할 수 있습니다.
+
+```bash
+docker run --rm hello-world 2>&1 | tee hello-world.log
+cat hello-world.log
+```
+
+`hello-world.log`의 실제 전체 내용을 이 README에 코드 블록으로 추가하면 실행 증빙을 본문에서도 확인할 수 있습니다. 로그 내용은 설치된 이미지 버전과 실행 환경에 따라 달라질 수 있으므로 임의의 출력 대신 실제 실행 결과를 사용합니다.
 
 이를 통해 Docker 클라이언트가 Docker 데몬과 통신하고 컨테이너를 실행할 수 있음을 확인했습니다.
 
@@ -297,6 +362,40 @@ docker ps -a --filter name=mission-ubuntu-background
 | `docker ps` | 현재 실행 중인 컨테이너 확인 |
 | `docker ps -a` | 종료된 컨테이너를 포함한 전체 목록 확인 |
 
+### 이미지와 컨테이너의 차이
+
+Docker **이미지(Image)**는 애플리케이션 실행에 필요한 코드, 라이브러리 및 설정을 담은 읽기 전용 템플릿입니다. Docker **컨테이너(Container)**는 이미지를 바탕으로 생성되어 실제로 실행되는 인스턴스입니다.
+
+| 구분 | 이미지(Image) | 컨테이너(Container) |
+|---|---|---|
+| 역할 | 실행 환경의 템플릿 | 이미지를 실행한 인스턴스 |
+| 생성·실행 | `docker build`로 이미지 빌드 | `docker run`으로 컨테이너 생성 및 실행 |
+| 변경 | Dockerfile 또는 빌드 입력 파일을 수정한 뒤 다시 빌드 | 실행 중 변경한 파일은 컨테이너의 쓰기 가능 계층에 저장될 수 있음 |
+| 삭제 | `docker rmi`로 이미지 삭제 | `docker rm`으로 컨테이너 삭제 |
+
+컨테이너 안에서 변경한 데이터는 이미지 자체에 자동 반영되지 않습니다. 컨테이너의 쓰기 가능 계층에 저장된 변경사항은 컨테이너를 삭제하면 함께 사라질 수 있습니다. 이미지 내용을 변경하려면 Dockerfile 또는 빌드 입력 파일을 수정한 뒤 이미지를 다시 빌드하고 컨테이너를 재생성해야 합니다. 컨테이너를 삭제해도 유지해야 하는 데이터는 Bind Mount 또는 Docker Volume에 저장합니다.
+
+```bash
+# 이미지 빌드
+
+docker build -t mission-web:1.0 .
+
+# 이미지로 컨테이너 생성 및 실행
+docker run -d --name mission-web-example -p 8082:80 mission-web:1.0
+
+# 컨테이너 상태 확인
+docker ps -a
+```
+
+### 컨테이너 및 이미지 목록의 실제 출력 확인
+
+```bash
+docker ps -a
+docker images
+```
+
+위 두 명령의 결과에는 실행·종료된 컨테이너와 로컬 이미지가 표시됩니다. 실제 제출 시에는 본인 환경에서 실행한 출력 일부를 README 본문에 추가합니다.
+
 ## 7. Dockerfile을 이용한 사용자 정의 이미지 생성
 
 NGINX를 기반으로 간단한 웹 서버 이미지를 생성했습니다.
@@ -351,6 +450,15 @@ docker build -t mission-web:1.0 .
 
 빌드가 정상적으로 완료되어 `mission-web:1.0`이라는 사용자 정의 이미지가 생성되었습니다.
 
+빌드 단계와 결과를 확인할 수 있도록 다음 명령어로 전체 빌드 로그를 저장합니다.
+
+```bash
+set -o pipefail
+docker build --progress=plain -t mission-web:1.0 . 2>&1 | tee docker-build.log
+```
+
+빌드가 끝난 후 `docker-build.log`를 열어 실제 출력 내용을 확인하고, 주요 단계와 최종 성공 메시지를 README 본문에 추가합니다. 오류가 실제로 발생한 경우에는 오류 메시지와 해결 후 재실행 결과를 함께 기록합니다. 발생하지 않은 오류나 로그를 만들어 넣지는 않습니다.
+
 이미지 목록 확인:
 
 ```bash
@@ -372,6 +480,14 @@ docker run -d \
 
 `-p 8080:80`은 호스트의 8080번 포트를 컨테이너의 80번 포트에 연결한다는 의미입니다.
 
+### 네트워크 네임스페이스와 포트 포워딩
+
+Docker 컨테이너는 네트워크 네임스페이스(Network Namespace)를 사용하여 네트워크 인터페이스, IP 주소, 라우팅 정보 등 네트워크 환경을 다른 컨테이너 및 호스트와 분리합니다. 이를 통해 컨테이너별로 독립적인 네트워크 환경을 구성할 수 있습니다.
+
+Docker의 기본 Bridge 네트워크를 사용하는 컨테이너는 별도의 컨테이너 네트워크 환경에서 통신합니다. `-p 8080:80`과 같은 포트 게시(publishing) 설정은 호스트의 8080번 포트로 들어온 요청을 컨테이너의 80번 포트로 전달하도록 연결합니다. 즉, 네트워크 네임스페이스는 네트워크 환경을 격리하고, 포트 매핑은 호스트에서 컨테이너 서비스에 접근할 수 있도록 연결하는 역할을 합니다.
+
+참고로 Dockerfile의 `EXPOSE 80`은 컨테이너에서 사용할 포트를 문서화하는 설정이며, 호스트 포트를 실제로 게시하려면 `docker run -p` 옵션이 필요합니다.
+
 | 구분 | 포트 |
 |---|---:|
 | 호스트 포트 | 8080 |
@@ -382,6 +498,41 @@ docker run -d \
 **http://localhost:8080**
 
 NGINX 로그에서 웹 페이지 요청이 HTTP 상태 코드 `200`으로 정상 처리된 것을 확인했습니다.
+
+브라우저 접속 외에도 다음 명령어로 HTTP 응답 헤더를 확인할 수 있습니다.
+
+```bash
+curl -I http://localhost:8080
+```
+
+정상 접속 시 HTTP 상태 코드가 `200` 계열로 반환되는지 확인합니다. 실제 응답 헤더에는 서버 버전, 날짜, 콘텐츠 유형 등 환경에 따라 달라지는 값이 포함되므로 본인 컴퓨터에서 실행한 결과를 README에 추가합니다.
+
+### 실습 재현 전 체크리스트
+
+- [ ] Windows에서 Docker Desktop이 실행 중인지 확인
+- [ ] WSL 2와 Ubuntu 배포판이 설치되어 있는지 확인
+- [ ] Docker Desktop의 WSL Integration에서 Ubuntu가 활성화되어 있는지 확인
+- [ ] Ubuntu 터미널에서 `docker version`이 Client와 Server 정보를 모두 표시하는지 확인
+- [ ] 프로젝트 최상위 디렉터리에 `Dockerfile`이 있는지 확인
+- [ ] `site/index.html` 파일이 있는지 확인
+- [ ] 호스트 포트 8080이 다른 프로그램 또는 컨테이너에서 사용 중인지 확인
+- [ ] 필요한 Docker 이미지가 로컬에 있는지 또는 다운로드 가능한지 확인
+
+사전 확인 명령어:
+
+```bash
+docker version
+docker ps
+ls -l Dockerfile site/index.html
+docker images
+```
+
+Windows PowerShell에서 포트 점유 상태를 확인하려면 다음 명령어를 사용합니다.
+
+```powershell
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+netstat -ano | findstr :8080
+```
 
 ## 9. Docker 이미지 및 컨테이너 모니터링
 
@@ -439,6 +590,18 @@ docker run -d \
 `:ro` 옵션은 컨테이너 내부에서 마운트된 디렉터리를 읽기 전용으로 설정합니다.
 
 따라서 호스트에서는 파일을 수정할 수 있지만, 컨테이너에서는 해당 마운트 경로의 파일을 수정할 수 없습니다.
+
+### 절대 경로와 상대 경로 선택 기준
+
+상대 경로는 현재 작업 디렉터리를 기준으로 파일 위치를 표현하므로 프로젝트 내부 파일을 설명할 때 간결하고 프로젝트 구조를 이해하기 쉽습니다. 반면 절대 경로는 파일의 전체 위치를 명확하게 지정할 수 있지만, 사용자마다 프로젝트를 저장한 위치가 다르면 경로를 수정해야 하므로 재현성이 낮아질 수 있습니다.
+
+이 실습에서는 프로젝트 최상위 디렉터리에서 `$PWD`를 사용하여 현재 위치를 절대 경로로 변환했습니다.
+
+```bash
+-v "$PWD/site:/usr/share/nginx/html:ro"
+```
+
+이 방식은 `/home/사용자이름/...`처럼 특정 사용자 경로를 명령어에 직접 입력하지 않아도 되어 다른 WSL 사용자 환경에서도 재사용하기 쉽습니다. 이 명령은 Ubuntu(WSL) 터미널에서 프로젝트 최상위 디렉터리로 이동한 뒤 실행합니다.
 
 ### 호스트의 HTML 파일 수정
 
@@ -530,6 +693,69 @@ Persistent data test
 
 이는 데이터가 컨테이너 내부에만 저장된 것이 아니라 Docker Volume에 저장되어 유지되었기 때문입니다.
 
+### Docker Volume 메타정보 확인
+
+Volume의 상세 정보와 Docker가 관리하는 저장 위치를 확인합니다.
+
+```bash
+docker volume inspect mission-data
+```
+
+출력에서 `Name`, `Driver`, `Mountpoint`, `Scope` 등의 항목을 확인합니다. Docker Desktop의 WSL 2 환경에서 `Mountpoint`는 Docker가 관리하는 Linux 환경 내부 경로일 수 있으므로 Windows 파일 탐색기에서 임의로 직접 수정하지 않고 Docker 명령어를 통해 관리합니다. 실제 `docker volume inspect` JSON 출력은 본인 환경의 결과를 README에 추가합니다.
+
+### Docker Volume 백업
+
+컨테이너 삭제나 데이터 손실에 대비하여 Volume의 데이터를 별도 압축 파일로 백업합니다. 백업 파일은 Git 저장소 안이 아닌 WSL 사용자 홈 디렉터리에 보관합니다.
+
+```bash
+mkdir -p "$HOME/docker-backups"
+
+docker run --rm \
+  -v mission-data:/data:ro \
+  -v "$HOME/docker-backups:/backup" \
+  ubuntu:24.04 \
+  tar czf /backup/mission-data-backup.tar.gz -C /data .
+```
+
+백업 파일과 내부 파일 목록을 확인합니다.
+
+```bash
+ls -lh "$HOME/docker-backups/mission-data-backup.tar.gz"
+tar -tzf "$HOME/docker-backups/mission-data-backup.tar.gz"
+```
+
+### Docker Volume 복구
+
+기존 Volume을 덮어쓰지 않고 별도의 복구용 Volume을 만들어 백업 파일을 복원합니다.
+
+```bash
+docker volume create mission-data-restored
+
+docker run --rm \
+  -v mission-data-restored:/data \
+  -v "$HOME/docker-backups:/backup:ro" \
+  ubuntu:24.04 \
+  tar xzf /backup/mission-data-backup.tar.gz -C /data
+```
+
+복구된 데이터가 정상적으로 읽히는지 확인합니다.
+
+```bash
+docker run --rm \
+  -v mission-data-restored:/data \
+  ubuntu:24.04 \
+  cat /data/message.txt
+```
+
+예상 확인 내용은 기존에 저장한 `Persistent data test` 문자열입니다. 실제 복구 검증 후 출력 결과를 기록합니다.
+
+### 백업 및 복구 시 주의사항
+
+1. 백업 파일은 원본 Volume과 다른 위치에 보관해야 합니다.
+2. 백업 시 애플리케이션이 데이터를 계속 변경하면 일관성이 맞지 않을 수 있으므로, 서비스 환경에서는 애플리케이션을 중지하거나 데이터베이스의 정식 백업 기능을 함께 사용합니다.
+3. 백업 파일이 생성되었는지, 복구 후 파일 내용이 같은지 반드시 확인합니다.
+4. 실제 서비스의 중요한 데이터는 별도 디스크나 원격 저장소에도 추가 백업하는 것이 안전합니다.
+
 ## 12. Git 및 GitHub 설정
 
 Git을 이용하여 프로젝트를 관리하고 GitHub 원격 저장소와 연결했습니다.
@@ -538,7 +764,7 @@ Git을 이용하여 프로젝트를 관리하고 GitHub 원격 저장소와 연�
 
 ```bash
 git config --global user.name "caterina1974"
-git config --global user.email "mjshin99@gmail.com"
+git config --global user.email "YOUR_GITHUB_EMAIL_OR_NOREPLY_EMAIL"
 git config --global init.defaultBranch main
 ```
 
@@ -548,7 +774,7 @@ git config --global init.defaultBranch main
 git config --list
 ```
 
-Git 사용자 이름은 `caterina1974`, 이메일은 `mjshin99@gmail.com`, 기본 브랜치는 `main`으로 설정했습니다.
+Git 사용자 이름과 이메일은 본인의 GitHub 계정 설정에 맞게 지정하고, 기본 브랜치는 `main`으로 설정합니다. 공개 저장소에 개인 이메일을 노출하고 싶지 않다면 GitHub에서 제공하는 noreply 이메일 주소를 사용할 수 있습니다. 위 예시의 이메일 값은 실제 사용하는 주소로 바꿔 실행합니다.
 
 ### Git 저장소 초기화
 
@@ -610,6 +836,16 @@ git push -u origin main
 ```
 
 Push가 성공적으로 완료되었으며, 로컬 `main` 브랜치가 원격 저장소의 `origin/main` 브랜치를 추적하도록 설정되었습니다.
+
+### 원격 저장소 반영 및 커밋 확인
+
+```bash
+git log --oneline --decorate -5
+git remote -v
+git ls-remote origin refs/heads/main
+```
+
+`git log`에서 로컬 커밋 해시와 메시지를 확인하고, `git remote -v`에서 원격 저장소 주소를 확인합니다. `git ls-remote`는 GitHub 원격 `main` 브랜치의 커밋 해시를 확인하는 명령어입니다. 실제 해시는 저장소의 변경에 따라 달라지므로 본인 실행 결과를 증빙으로 기록합니다.
 
 ## 13. Visual Studio Code
 
@@ -785,6 +1021,106 @@ wsl --terminate Ubuntu-24.04
 wsl -d Ubuntu-24.04
 ```
 
+### 문제 6. Docker 웹 서버 포트 충돌
+
+**오류 예시**
+
+```text
+Bind for 0.0.0.0:8080 failed: port is already allocated
+```
+
+**원인**
+
+Windows 호스트의 8080번 포트를 다른 프로그램이나 Docker 컨테이너가 이미 사용 중일 때 발생할 수 있습니다. WSL 내부에서 실행 중인 프로세스뿐 아니라 Windows에서 실행 중인 프로그램도 포트를 점유할 수 있으므로 Windows와 Docker 양쪽을 확인합니다.
+
+**1단계. Windows PowerShell에서 포트 사용 프로세스 확인**
+
+```powershell
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue |
+  Select-Object LocalAddress, LocalPort, OwningProcess
+
+netstat -ano | findstr :8080
+```
+
+출력의 `OwningProcess` 또는 `netstat` 마지막 열에서 PID를 확인합니다. 해당 프로세스의 이름을 확인합니다.
+
+```powershell
+Get-Process -Id <PID>
+```
+
+**2단계. Ubuntu(WSL)에서 포트 사용 상태 확인**
+
+```bash
+sudo ss -ltnp | grep ':8080' || true
+sudo lsof -iTCP:8080 -sTCP:LISTEN -P -n
+```
+
+`lsof`가 설치되어 있지 않다면 `ss` 명령어를 사용합니다.
+
+**3단계. Docker 컨테이너의 포트 게시 상태 확인**
+
+```bash
+docker ps --filter publish=8080
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+```
+
+**4단계. 안전하게 포트 해제 또는 포트 변경**
+
+불필요한 Docker 컨테이너가 포트를 사용 중이라면 컨테이너 이름을 확인한 후 중지합니다.
+
+```bash
+docker stop <컨테이너이름>
+```
+
+Windows 프로그램이 사용 중이라면 프로세스 이름과 용도를 먼저 확인하고, 종료해도 되는 프로그램인 경우에만 정상 종료합니다. 강제 종료는 데이터 손실을 일으킬 수 있으므로 무작정 실행하지 않습니다.
+
+```powershell
+Stop-Process -Id <PID>
+```
+
+기존 프로그램을 종료할 수 없다면 Docker 호스트 포트를 다른 번호로 변경합니다. 예를 들어 호스트의 8082번 포트를 컨테이너의 80번 포트에 연결할 수 있습니다.
+
+```bash
+docker run -d \
+  --name mission-web-8082 \
+  -p 8082:80 \
+  mission-web:1.0
+```
+
+**5단계. 해결 여부 확인**
+
+```bash
+docker ps --filter publish=8082
+curl -I http://localhost:8082
+```
+
+HTTP 응답이 정상적으로 반환되는지 확인합니다. 포트가 여전히 사용 중이라면 1~3단계를 반복하여 실제 점유 프로세스 또는 컨테이너를 다시 확인합니다.
+
+**정리**
+
+포트 충돌은 `사용 포트 확인 → PID 또는 컨테이너 확인 → 안전한 종료 또는 호스트 포트 변경 → 재실행 → HTTP 응답 확인` 순서로 해결합니다. 포트를 점유한 프로세스를 확인하지 않고 임의로 종료하지 않는 것이 중요합니다.
+
+### 트러블슈팅 로그 기록 원칙
+
+오류가 발생하면 오류 메시지를 생략하거나 요약만 하지 않고, 실행한 명령어와 원본 오류 출력, 원인 확인 결과, 해결 후 정상 출력을 함께 기록합니다. 아래 명령어는 현재 환경의 상태를 확인하는 예시이며, 과거에 발생한 오류 로그를 대신하지는 않습니다.
+
+```bash
+# Docker 명령 및 서버 정보 확인
+docker --version 2>&1 | tee docker-version-check.log
+docker info 2>&1 | tee docker-info-check.log
+
+# 사용자 그룹 확인
+id
+id -nG
+
+# GitHub 인증 및 저장소 상태 확인
+gh auth status 2>&1 | tee github-auth-check.log
+git status -sb
+git log --oneline --graph --all -8
+```
+
+오류가 발생하지 않은 항목은 정상 출력만 기록하고, 실제로 발생하지 않은 오류 메시지를 만들어 넣지 않습니다.
+
 ## 15. 프로젝트 디렉터리 구조
 
 ```text
@@ -820,9 +1156,70 @@ dev-workstation/
     └── 20-github-repository.png
 ```
 
+### 디렉터리 및 파일별 역할
+
+| 디렉터리·파일 | 역할 |
+|---|---|
+| `README.md` | 개발 환경 구축 과정, 명령어, 개념 및 검증 결과를 기록 |
+| `Dockerfile` | NGINX 기반 사용자 정의 Docker 이미지를 빌드하기 위한 설정 |
+| `cli-practice/` | Linux 파일·디렉터리 및 권한 실습 자료 보관 |
+| `cli-practice/notes.txt` | 텍스트 파일 생성·쓰기·읽기 실습 파일 |
+| `cli-practice/permission-file.txt` | `chmod` 권한 변경 실습 파일 |
+| `site/` | NGINX 웹 서버에서 제공하는 HTML 콘텐츠 보관 |
+| `site/index.html` | 웹 브라우저에서 확인하는 웹 페이지 |
+| `screenshots/` | 실습 단계별 화면 및 실행 결과 증빙 이미지 보관 |
+
+각 실습 파일은 목적에 따라 분리했습니다. Dockerfile과 `site/` 디렉터리는 이미지 빌드 및 Bind Mount 실습에 사용하고, `cli-practice/`는 Linux 명령어와 권한 실습에 사용합니다. `screenshots/`에는 각 단계의 실행 화면을 보관합니다.
+
 ## 16. 실습 스크린샷 및 증빙 자료
 
 각 단계의 설정 및 실행 결과를 다음 스크린샷으로 기록했습니다.
+
+### 평가 항목 보완을 위한 실제 출력 수집 명령어
+
+아래 명령어는 README 본문에 첨부할 실제 실행 결과를 수집할 때 사용합니다. 명령어 자체가 실행 증빙을 대신하지는 않으므로, 각 명령을 본인 컴퓨터에서 실행한 뒤 출력 내용을 복사하거나 스크린샷으로 저장합니다.
+
+```bash
+# Docker 서버 정보
+docker info | sed -n '1,35p'
+
+# hello-world 전체 로그
+docker run --rm hello-world 2>&1 | tee hello-world.log
+
+# 컨테이너 및 이미지 목록
+docker ps -a
+docker images
+
+# Docker 이미지 빌드 전체 로그
+set -o pipefail
+docker build --progress=plain -t mission-web:1.0 . 2>&1 | tee docker-build.log
+
+# 웹 서버 HTTP 응답 헤더
+curl -I http://localhost:8080
+
+# Docker Volume 메타정보
+docker volume inspect mission-data
+
+# Volume 백업 파일 확인
+ls -lh "$HOME/docker-backups/mission-data-backup.tar.gz"
+
+# Git 커밋 및 원격 저장소 확인
+git log --oneline --decorate -5
+git remote -v
+git ls-remote origin refs/heads/main
+```
+
+실제 출력은 운영체제, Docker 버전, 실행 시각, 커밋 상태 등에 따라 달라집니다. 따라서 `docker info`, `docker build`, `curl -I`, `docker volume inspect`, Git 명령의 결과는 본인 환경에서 얻은 값으로 기록합니다. 평가에 사용하지 않은 가상의 출력이나 다른 컴퓨터의 로그를 붙여 넣지 않습니다.
+
+| 평가 증빙 | README에 기록할 내용 |
+|---|---|
+| Docker 서버 정보 | `docker info`의 Server Version, Operating System 등 실제 출력 일부 |
+| Hello World | `hello-world.log`의 실제 전체 출력 |
+| 컨테이너·이미지 목록 | `docker ps -a`, `docker images` 실제 출력 |
+| 이미지 빌드 | `docker-build.log`의 빌드 단계와 성공 결과 |
+| 포트 매핑 | `curl -I http://localhost:8080` 실제 HTTP 응답 헤더 |
+| Volume | `docker volume inspect mission-data` 실제 JSON 결과 및 백업·복구 확인 |
+| GitHub | 실제 `git log`, `git remote -v`, `git ls-remote` 결과 |
 
 | 번호 | 내용 | 스크린샷 |
 |---|---|---|
@@ -861,6 +1258,8 @@ dev-workstation/
 또한 NGINX 웹 서버를 실행하고 포트 매핑, Bind Mount, Docker Volume을 활용하여 웹 서비스 실행과 데이터 영속성을 확인했습니다.
 
 마지막으로 Git과 GitHub CLI를 이용하여 프로젝트를 버전 관리하고 원격 저장소에 업로드하는 과정을 완료했습니다.
+
+이번 실습에서는 Docker 이미지와 컨테이너의 차이, 컨테이너 네트워크 격리와 포트 게시, Bind Mount 경로 선택, Docker Volume 백업 및 복구, 포트 충돌 진단 방법도 정리했습니다. 문서의 실행 결과와 로그는 실제 Windows·WSL 2·Docker Desktop 환경에서 확인한 내용을 기준으로 유지합니다.
 
 **최종 GitHub 저장소:**
 
